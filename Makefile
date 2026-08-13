@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Werror -Iinclude
 NAME = saloShell
 
 
-OBJ = obj/main.o obj/parser.o obj/utils.o
+OBJ = obj/main.o obj/tokenizer.o obj/token.o obj/utils.o 
 
 all: $(NAME)
 
