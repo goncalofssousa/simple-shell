@@ -16,8 +16,7 @@ Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fd)
 }
 
 void tokenAppend(Token **head, Token **tail, Token *token) {
-    if (!token)
-        return;
+    if (!token) return;
 
     if (*head == NULL) {
         *head = token;
