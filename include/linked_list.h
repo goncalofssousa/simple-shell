@@ -14,6 +14,6 @@ typedef struct list {
 List *newList();
 void listAppend(List *list, void *data); 
 void freeList(List *list, void (*freeData)(void *data)); 
-void printList(List *list, void (*printData)(void *data)); 
+void printList(List *list, void (*printData)(void *)); 
 
 #endif
