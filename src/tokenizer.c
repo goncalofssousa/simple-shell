@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include "linked_list.h"
 
 
 char *token_type_name(TokenType type) {
@@ -13,38 +14,7 @@ char *token_type_name(TokenType type) {
     return "UNKNOWN";
 }
 
-char *redir_type_name(RedirectType type) {
-    switch (type) {
-        case REDIR_INPUT:   return "REDIR_INPUT (<)";
-        case REDIR_OUTPUT:  return "REDIR_OUTPUT (>)";
-        case REDIR_APPEND:  return "REDIR_APPEND (>>)";
-        case REDIR_HEREDOC: return "REDIR_HEREDOC (<<)";
-    }
-    return "UNKNOWN";
-}
-
-void printTokens(Token *tokens) {
-    int i = 0;
-
-    while (tokens)
-    {
-        printf("Token %d:\n", i);
-        printf("  type: %s\n", token_type_name(tokens->type));
-        printf("  value: %s\n", tokens->value);
-
-        if (tokens->type == TOKEN_DIR)
-        {
-            printf("  fd: %d\n", tokens->fd);
-            printf("  redirect_type: %s\n", redir_type_name(tokens->redir_type));
-        }
-
-        printf("\n");
-        tokens = tokens->next;
-        i++;
-    }
-}
-
-RedirectType parseRedirectOperator(char *op) {
+RedirectType getRedirectOperator(char *op) {
     if (op[0] == '<' && op[1] == '<')
         return REDIR_HEREDOC;
     if (op[0] == '>' && op[1] == '>')
@@ -69,66 +39,56 @@ char *getRedirectionOperator(char *p) {
     return NULL;
 }
 
-int parseFd(char *command, char *op) {
+int getFd(char *command, char *op) {
     int fd;
 
     if (command == op) return (*op == '<') ? 0 : 1;
 
     fd = 0;
-    while (command != op)
-    {
+    while (command != op) {
         fd = fd * 10 + (*command - '0');
         command++;
     }
     return fd;
 }
 
-int addWordToken(Token **head, Token **tail, char *start, char *end) {
+int addWordToken(List *tokens, char *start, char *end) {
     Token *newToken;
 
-    if (start == end || *start == '\0')
-        return 0;
+    if (start == end || *start == '\0') return 0;
 
     newToken = tokenCreate(TOKEN_WORD, start, REDIR_INPUT, -1);
     if (!newToken){
-        tokenFreeList(*head);
-        *head = NULL;
-        *tail = NULL;
+        freeList(tokens, freeToken);
         return -1;
     }
-    tokenAppend(head, tail, newToken);
+    listAppend(tokens, newToken);
     return 0;
 }
 
-int addToken(Token **head, Token **tail, TokenType type, char *value, RedirectType redir_type, int fd) {
+int addToken(List *tokens, TokenType type, char *value, RedirectType redir_type, int fd) {
     Token *newToken = tokenCreate(type, value, redir_type, fd);
 
     if (!newToken) {
-        tokenFreeList(*head);
-        *head = NULL;
-        *tail = NULL;
+        freeList(tokens, freeToken); 
         return -1;
     }
-    tokenAppend(head, tail, newToken);
+    listAppend(tokens, newToken); 
     return 0;
 }
 
-Token *tokenizeCommand(char *command) {
-    char    *ptr = command;
-    char    quote = '\0';
-    Token   *head = NULL;
-    Token   *tail = NULL;
-    char    *redir_op;
+List *tokenizeCommand(char *command) {
+    char *ptr = command;
+    char quote = '\0';
+    List *tokens = newList(); 
+    char *redir_op;
 
     while (*command != '\0') {
         if (*command == '\'' || *command == '"') {
-            if (quote == '\0')
-                quote = *command;
-            else if (*command == quote)
-            {
+            if (quote == '\0') quote = *command;
+            else if (*command == quote) {
                 *command = '\0';
-                if (addWordToken(&head, &tail, ptr, command) == -1)
-                    return NULL;
+                if (addWordToken(tokens, ptr, command) == -1) return NULL;
                 quote = '\0';
             }
             ptr = command + 1;
@@ -143,39 +103,34 @@ Token *tokenizeCommand(char *command) {
 
         if (*command == ' ') {
             *command = '\0';
-            if (addWordToken(&head, &tail, ptr, command) == -1)
-                return NULL;
+            if (addWordToken(tokens, ptr, command) == -1) return NULL;
 
             command++;
-            while (*command == ' ')
-                command++;
+            while (*command == ' ') command++;
             ptr = command;
             continue;
         }
 
         if (*command == '|') {
             *command = '\0';
-            if (addWordToken(&head, &tail, ptr, command) == -1)
-                return NULL;
-            if (addToken(&head, &tail, TOKEN_PIPE, "|", REDIR_INPUT, -1) == -1)
-                return NULL;
+            if (addWordToken(tokens, ptr, command) == -1) return NULL;
+            if (addToken(tokens, TOKEN_PIPE, "|", REDIR_INPUT, -1) == -1) return NULL;
 
             command++;
-            while (*command == ' ')
-                command++;
+            while (*command == ' ') command++;
             ptr = command;
             continue;
         }
 
         redir_op = getRedirectionOperator(command);
         if (redir_op != NULL) {
-            int fd = parseFd(command, redir_op);
-            RedirectType redir_type = parseRedirectOperator(redir_op);
+            int fd = getFd(command, redir_op);
+            RedirectType redir_type = getRedirectOperator(redir_op);
             int op_len = (redir_type == REDIR_APPEND || redir_type == REDIR_HEREDOC) ? 2 : 1;
 
             *command = '\0';
-            if (addWordToken(&head, &tail, ptr, command) == -1) return NULL;
-            if (addToken(&head, &tail, TOKEN_DIR, "\0", redir_type, fd) == -1)return NULL;
+            if (addWordToken(tokens, ptr, command) == -1) return NULL;
+            if (addToken(tokens, TOKEN_DIR, "\0", redir_type, fd) == -1)return NULL;
 
             command = redir_op + op_len;
             while (*command == ' ') command++;
@@ -186,7 +141,7 @@ Token *tokenizeCommand(char *command) {
         command++;
     }
 
-    if (addWordToken(&head, &tail, ptr, command) == -1) return NULL;
+    if (addWordToken(tokens, ptr, command) == -1) return NULL;
 
-    return head;
+    return tokens;
 }

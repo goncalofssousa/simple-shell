@@ -1,82 +1,60 @@
-#include"parser.h"
-#include<stdlib.h>
+#include "parser.h"
+#include <stdlib.h>
+#include<stdio.h>
 
-#include <stdio.h>
-
-Command *appendCommand(Command **head, Command **tail){
-    Command *new = malloc(sizeof(Command)); 
-    if(!new) return NULL; 
-    new->red_head = NULL; 
-    new->next = NULL;
-    new->numArgs = 0; 
-
-    if(*head == NULL){
-        *head = new; 
-    } else {
-        (*tail)->next = new; 
-    }
-    *tail = new; 
-    return new; 
-}
-
-void freeRedirectionList(Redirection *redirections){
-    Redirection *next;
-
-    while (redirections) {
-        next = redirections->next;
-        free(redirections);
-        redirections = next;
-    }
-}
-
-void freeComandList(Command *commands) {
-    Command *next;
-
-    while (commands) {
-        freeRedirectionList(commands->red_head);
-        next = commands->next;
-        free(commands);
-        commands = next;
-    }
-}
-
-
-Command *parseTokenList(Token *tokenList){
-    Command *head = NULL; 
-    Command *tail = NULL; 
-    while(tokenList != NULL){
-        Command *new = appendCommand(&head, &tail); 
-        Redirection *red_tail = NULL;
-        while(tokenList != NULL && tokenList->type != TOKEN_PIPE){
-            if(tokenList->type == TOKEN_WORD){
-                new->args[new->numArgs++] = tokenList->value; 
-            } 
-            else if (tokenList->type == TOKEN_DIR){
-                Redirection *newRedir = malloc(sizeof(Redirection));
-                if(!new) return NULL; 
-                newRedir->fd = tokenList->fd; 
-                newRedir->type = tokenList->redir_type;  
-                if(!tokenList->next || tokenList->next->type != TOKEN_WORD){
-                    freeComandList(head);
-                    free(newRedir); 
-                    return NULL; 
-                }
-
-                tokenList = tokenList->next;
-                newRedir->destFile = tokenList->value; 
-
-                if(new->red_head == NULL){
-                    new->red_head = newRedir; 
-                } else {
-                    red_tail->next = newRedir; 
-                }
-                red_tail = newRedir; 
-            } 
-
-            tokenList = tokenList->next; 
+List *parseTokenList(List *tokenList) {
+    List *commands = newList(); 
+    if(!commands) return NULL; 
+    ListNode *atual = tokenList->head; 
+    while (atual != NULL) {
+        Command *cmd = commandCreate(); 
+        if (!cmd) {
+            freeList(commands, freeCommand);
+            return NULL;
         }
-        if(tokenList) tokenList = tokenList->next; 
-    }   
-    return head; 
-}
+        listAppend(commands, cmd);
 
+        Token *token = atual->data; 
+        if(!token) {
+            freeList(commands, freeCommand); 
+            return NULL;
+        }             
+
+        while (atual != NULL && token->type != TOKEN_PIPE) {
+            if (token->type == TOKEN_WORD) {
+                cmd->args[cmd->numArgs++] = token->value;
+            }
+            else if (token->type == TOKEN_DIR) {
+                if(atual->next == NULL){
+                    freeList(commands, freeCommand); 
+                    return NULL;
+                }
+
+                Token *nextToken = atual->next->data; 
+                if(!nextToken || nextToken->type != TOKEN_WORD) {
+                    freeList(commands, freeCommand); 
+                    return NULL;
+                } 
+
+                Redirection *newRedir = redirectionCreate(token->fd, token->redir_type, nextToken->value);
+                if (!newRedir) {
+                    freeList(commands, freeCommand); 
+                    return NULL;
+                }
+                listAppend(cmd->redirections, newRedir);
+
+                atual = atual->next;
+            }
+
+            atual = atual->next;
+            if(atual){
+                token = atual->data; 
+                if(!token) return NULL; 
+            }
+        }
+
+        if (atual) atual = atual->next;
+    }
+
+    return commands;
+}

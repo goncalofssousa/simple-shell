@@ -1,7 +1,7 @@
 #include "token.h"
 #include <stdlib.h>
 
-Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fd){
+Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fd) {
     Token *token = malloc(sizeof(Token));
 
     if (!token) return NULL;
@@ -15,26 +15,10 @@ Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fd)
     return token;
 }
 
-void tokenAppend(Token **head, Token **tail, Token *token) {
-    if (!token) return;
+void freeToken(void *data){
+    Token *token = (Token *) data; 
 
-    if (*head == NULL) {
-        *head = token;
-        *tail = token;
-    }
-    else {
-        (*tail)->next = token;
-        *tail = token;
-    }
-}
+    if(!token) return; 
 
-
-void tokenFreeList(Token *tokens) {
-    Token *next;
-
-    while (tokens) {
-        next = tokens->next;
-        free(tokens);
-        tokens = next;
-    }
+    free(token); 
 }

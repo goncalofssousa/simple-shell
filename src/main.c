@@ -6,6 +6,7 @@
 #include <sys/wait.h>   
 #include <sys/types.h>  
 #include<tokenizer.h>
+#include<command.h>
 #include<parser.h>
 
 int main(){
@@ -21,26 +22,16 @@ int main(){
             printf("Error on read\n");
             return 1; 
         } else if (result == 0){
-            Token *tokensHead = tokenizeCommand(buffer); 
-            Command *commandsHead = parseTokenList(tokensHead);
-            tokenFreeList(tokensHead); 
-            while(commandsHead != NULL){
-                printf("Command: %s\n", commandsHead->args[0]); 
-                printf("Args:\n"); 
-                for(int i = 0; i < commandsHead->numArgs; i++){
-                    printf("   %d: %s\n", i, commandsHead->args[i]); 
-                }
-                printf("Redirections:\n"); 
-                Redirection *red = commandsHead->red_head; 
-                while(red != NULL){
-                    printf("type: %s | fd: %d | destFile: %s\n", redir_type_name(red->type), red->fd, red->destFile);
-                    red = red->next; 
-                }
-                printf("\n"); 
-                commandsHead = commandsHead->next; 
-            }
+            //tokenize input
+            List *tokensList = tokenizeCommand(buffer);
+            // parse + free tokens
+            List *commandsList = parseTokenList(tokensList);
+            freeList(tokensList, freeToken); 
 
-            freeComandList(commandsHead); 
+            // print commands parsed
+            printList(commandsList, printCommand); 
+            // free commands
+            freeList(commandsList, freeCommand);  
         } 
 
 
