@@ -52,7 +52,7 @@ List *parseTokenList(List *tokenList) {
                 if(!token) return NULL; 
             }
         }
-
+        cmd->args[cmd->numArgs] = NULL; 
         if (atual) atual = atual->next;
     }
 

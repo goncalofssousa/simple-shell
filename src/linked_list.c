@@ -7,7 +7,7 @@ List *newList() {
     new->tail = NULL; 
     return new; 
 }
-// return de algo aqui em caso de erro
+// return de algo aqui em caso de erro (int)
 void listAppend(List *list, void *data){
     ListNode *new = malloc(sizeof(ListNode)); 
     if(!new) return; 
