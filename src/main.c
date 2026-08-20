@@ -8,6 +8,7 @@
 #include<tokenizer.h>
 #include<command.h>
 #include<parser.h>
+#include<execution.h>
 
 int main(){
     print_banner(); 
@@ -28,9 +29,14 @@ int main(){
             List *commandsList = parseTokenList(tokensList);
             freeList(tokensList, freeToken); 
 
-            // print commands parsed
-            printList(commandsList, printCommand); 
-            // free commands
+
+            int resultExecution = execute(commandsList);
+            if(resultExecution) {
+                printf("Error executing\n");
+                freeList(commandsList, freeCommand);  
+                return 1; 
+            } 
+
             freeList(commandsList, freeCommand);  
         } 
 

@@ -9,9 +9,9 @@ typedef enum redirect_type {
 } RedirectType;
 
 typedef struct redirection {
-    int             fd;
-    char            *destFile;
-    RedirectType    type;
+    int fd;
+    char *destFile;
+    RedirectType type;
     struct redirection *next;
 } Redirection;
 

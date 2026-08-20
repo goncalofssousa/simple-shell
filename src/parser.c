@@ -1,11 +1,34 @@
 #include "parser.h"
 #include <stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
 #include<stdio.h>
+#include<string.h>
+
+void resolveHeredoc(char *filename, char *delimiter){
+    int bytesRead;
+    char buffer[1024]; 
+
+    int fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    while(1){
+        write(1, "> ", 2);  
+        bytesRead = read(0, buffer, sizeof(buffer) - 1);
+        buffer[bytesRead - 1] = '\0'; 
+        if(bytesRead <= 0 || (strcmp(buffer, delimiter) == 0)){
+            break;
+        }
+        buffer[bytesRead - 1] = '\n'; 
+        write(fd, buffer, bytesRead); 
+    }
+    close(fd); 
+}
+
 
 List *parseTokenList(List *tokenList) {
     List *commands = newList(); 
     if(!commands) return NULL; 
     ListNode *atual = tokenList->head; 
+    int numHeredoc = 0; 
     while (atual != NULL) {
         Command *cmd = commandCreate(); 
         if (!cmd) {
@@ -35,14 +58,27 @@ List *parseTokenList(List *tokenList) {
                     freeList(commands, freeCommand); 
                     return NULL;
                 } 
+                
+                Redirection *newRedir = NULL; 
 
-                Redirection *newRedir = redirectionCreate(token->fd, token->redir_type, nextToken->value);
+                if(token->redir_type == REDIR_HEREDOC){
+                    numHeredoc++; 
+                    char fileTmp[64]; 
+                    snprintf(fileTmp, sizeof(fileTmp), "tmp/heredoc_%d", numHeredoc); 
+                    char *filename = malloc(strlen(fileTmp)); 
+                    strcpy(filename, fileTmp); 
+                    resolveHeredoc(filename, nextToken->value);
+                    newRedir = redirectionCreate(token->fd, token->redir_type, filename);
+                }
+                else {
+                    newRedir = redirectionCreate(token->fd, token->redir_type, nextToken->value);
+                }
+
                 if (!newRedir) {
                     freeList(commands, freeCommand); 
                     return NULL;
                 }
                 listAppend(cmd->redirections, newRedir);
-
                 atual = atual->next;
             }
 
