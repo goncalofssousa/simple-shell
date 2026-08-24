@@ -20,7 +20,6 @@ int handleCommandRedirects(List *redirections) {
             case REDIR_INPUT:
                 fd = open(redirection->destFile, O_RDONLY);
                 if (fd == -1) {
-                    printf(redirection->destFile);
                     return 1;
                 }
 
@@ -36,7 +35,6 @@ int handleCommandRedirects(List *redirections) {
             case REDIR_OUTPUT:
                 fd = open(redirection->destFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 if (fd == -1) {
-                    printf(redirection->destFile);
                     return 1;
                 }
 
@@ -52,7 +50,6 @@ int handleCommandRedirects(List *redirections) {
             case REDIR_INOUT:
                 fd = open(redirection->destFile, O_RDWR | O_CREAT, 0644);
                 if (fd == -1) {
-                    printf(redirection->destFile);
                     return 1;
                 }
 
@@ -68,7 +65,6 @@ int handleCommandRedirects(List *redirections) {
             case REDIR_APPEND:
                 fd = open(redirection->destFile, O_WRONLY | O_CREAT | O_APPEND, 0644);
                 if (fd == -1) {
-                    printf(redirection->destFile);
                     return 1;
                 }
 
@@ -84,7 +80,6 @@ int handleCommandRedirects(List *redirections) {
             case REDIR_HEREDOC:
                 fd = open(redirection->destFile, O_RDONLY);
                 if (fd == -1) {
-                    printf(redirection->destFile);
                     return 1;
                 }
 
