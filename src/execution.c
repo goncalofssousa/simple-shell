@@ -8,41 +8,123 @@
 #include<redirection.h>
 #include<string.h>
 
-int handleCommandRedirects(List *redirections){
-    ListNode *node = redirections->head; 
-    while(node != NULL){
-        Redirection *redirection = (Redirection *) node->data; 
-        int fd;  
-        switch(redirection->type){
+int handleCommandRedirects(List *redirections) {
+    ListNode *node = redirections->head;
+
+    while (node != NULL) {
+        Redirection *redirection = node->data;
+        int fd;
+
+        switch (redirection->type) {
+
             case REDIR_INPUT:
-                fd = open(redirection->destFile, O_RDONLY); 
-                if(fd < 0) return 1; 
-                if(dup2(fd, redirection->fd) == -1) return 1;
+                fd = open(redirection->destFile, O_RDONLY);
+                if (fd == -1) {
+                    printf(redirection->destFile);
+                    return 1;
+                }
+
+                if (dup2(fd, redirection->fdSrc) == -1) {
+                    printf("dup2");
+                    close(fd);
+                    return 1;
+                }
+
                 close(fd);
-                break; 
-            case REDIR_OUTPUT: 
+                break;
+
+            case REDIR_OUTPUT:
                 fd = open(redirection->destFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-                if(fd < 0) return 1; 
-                if(dup2(fd, redirection->fd) == -1) return 1;
+                if (fd == -1) {
+                    printf(redirection->destFile);
+                    return 1;
+                }
+
+                if (dup2(fd, redirection->fdSrc) == -1) {
+                    printf("dup2");
+                    close(fd);
+                    return 1;
+                }
+
                 close(fd);
                 break;
-            case REDIR_APPEND: 
-                fd = open(redirection->destFile,  O_WRONLY | O_CREAT | O_APPEND, 0644);
-                if(fd < 0) return 1; 
-                if(dup2(fd, redirection->fd) == -1) return 1;
+
+            case REDIR_INOUT:
+                fd = open(redirection->destFile, O_RDWR | O_CREAT, 0644);
+                if (fd == -1) {
+                    printf(redirection->destFile);
+                    return 1;
+                }
+
+                if (dup2(fd, redirection->fdSrc) == -1) {
+                    printf("dup2");
+                    close(fd);
+                    return 1;
+                }
+
                 close(fd);
                 break;
-            case REDIR_HEREDOC: 
-                int fdRead = open(redirection->destFile, O_RDONLY); 
-                unlink(redirection->destFile);
-                dup2(fdRead, redirection->fd); 
-                close(fdRead);
+
+            case REDIR_APPEND:
+                fd = open(redirection->destFile, O_WRONLY | O_CREAT | O_APPEND, 0644);
+                if (fd == -1) {
+                    printf(redirection->destFile);
+                    return 1;
+                }
+
+                if (dup2(fd, redirection->fdSrc) == -1) {
+                    printf("dup2");
+                    close(fd);
+                    return 1;
+                }
+
+                close(fd);
                 break;
-            default: break; 
+
+            case REDIR_HEREDOC:
+                fd = open(redirection->destFile, O_RDONLY);
+                if (fd == -1) {
+                    printf(redirection->destFile);
+                    return 1;
+                }
+
+                if (dup2(fd, redirection->fdSrc) == -1) {
+                    printf("dup2");
+                    close(fd);
+                    return 1;
+                }
+
+                close(fd);
+
+                if (unlink(redirection->destFile) == -1) {
+                    printf("unlink");
+                    return 1;
+                }
+
+                break;
+
+            case REDIR_DUPLICATE:
+                if (dup2(redirection->fdDest, redirection->fdSrc) == -1) {
+                    printf("dup2");
+                    return 1;
+                }
+                break;
+
+            case REDIR_CLOSE:
+                if (close(redirection->fdSrc) == -1) {
+                    printf("close");
+                    return 1;
+                }
+                break;
+
+            default:
+                return 1;
         }
-        node = node->next;  
+
+        node = node->next;
     }
-    return 0; 
+
+    return 0;
 }
 
 int execute(List *commands){

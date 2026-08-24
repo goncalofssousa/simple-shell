@@ -9,6 +9,7 @@
 #include<command.h>
 #include<parser.h>
 #include<execution.h>
+#include"linked_list.h"
 
 int main(){
     print_banner(); 
@@ -33,10 +34,7 @@ int main(){
             int resultExecution = execute(commandsList);
             if(resultExecution) {
                 printf("Error executing\n");
-                freeList(commandsList, freeCommand);  
-                return 1; 
             } 
-
             freeList(commandsList, freeCommand);  
         } 
 

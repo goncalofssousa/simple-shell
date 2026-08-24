@@ -11,14 +11,16 @@ typedef enum token_type {
 
 
 typedef struct token {
-    TokenType       type;
-    char            *value;
-    int             fd;
-    RedirectType    redir_type;
-    struct token    *next;
+    TokenType type;
+    char *value;
+    int fdSrc;
+    int fdDest; 
+    RedirectType redir_type;
+    struct token *next;
 } Token;
 
-Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fd);
+Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fdSrc, int fdDest);
 void freeToken(void *data);
+void printToken(void *data);
 
 #endif
