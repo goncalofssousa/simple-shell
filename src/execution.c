@@ -20,6 +20,7 @@ int handleCommandRedirects(List *redirections) {
             case REDIR_INPUT:
                 fd = open(redirection->destFile, O_RDONLY);
                 if (fd == -1) {
+                    printf("Error opening file\n"); 
                     return 1;
                 }
 
@@ -129,37 +130,68 @@ int execute(List *commands){
     int numCommands = 0; 
     while(node != NULL){
         if(node->next != NULL){
-            // verificar caso de erro
-            pipe(pipe_fds);
+            if(pipe(pipe_fds) < 0) {
+                printf("Error creating pipe\n"); 
+                return 1; 
+            }
         }    
+
         pid_t pid = fork(); 
         if(pid == 0){
             Command *cmd = (Command *) node->data; 
     
             if(fd_in != 0){
-                dup2(fd_in, 0); 
-                close(fd_in); 
+                if(dup2(fd_in, 0) < 0){
+                    printf("Error duping fd_in\n"); 
+                    _exit(1); 
+                } 
+                if(close(fd_in) < 0) {
+                    printf("Error closing fd_in\n"); 
+                    _exit(1); 
+                } 
             }
 
             if(node->next != NULL){
-                close(pipe_fds[0]); 
-                dup2(pipe_fds[1], 1); 
-                close(pipe_fds[1]); 
+                if(close(pipe_fds[0]) < 0){
+                    printf("Error closing pipe_fds[0]\n"); 
+                    _exit(1); 
+                }
+
+                if(dup2(pipe_fds[1], 1) < 0){
+                    printf("Error duping pipe_fds[1]\n"); 
+                    _exit(1); 
+                } 
+
+                if(close(pipe_fds[1]) < 0){
+                    printf("Error closing pipe_fds[1]\n"); 
+                    _exit(1); 
+                }
             }
 
             if(handleCommandRedirects(cmd->redirections)) _exit(1);   
 
-            execvp(cmd->args[0], cmd->args); 
+            if(execvp(cmd->args[0], cmd->args) < 0){
+                printf("Command '%s' not found\n", cmd->args[0]);
+            } 
             _exit(1); 
         }  
         else if(pid < 0){
+            printf("Error on fork\n"); 
             return 1;  
         } 
         else {
-            if(fd_in != 0) close(fd_in);
+            if(fd_in != 0) {
+                if(close(fd_in) < 0){
+                    printf("Error closing fd_in\n"); 
+                    return 1; 
+                }
+            }
 
             if(node->next != NULL) {
-                close(pipe_fds[1]); 
+                if(close(pipe_fds[1]) < 0){
+                    printf("Error closing pipe_fds[1]\n"); 
+                    return 1; 
+                } 
                 fd_in = pipe_fds[0];
             } 
             numCommands++;

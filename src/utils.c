@@ -2,16 +2,35 @@
 #include<unistd.h>
 #include<string.h>
 #include<utils.h>
+#include<linux/limits.h>
 
 int readCommandToExecute(char *buffer){
     int bytesRead = read(0, buffer, sizeof buffer[0] * BUFF_SIZE - 1);
     if(bytesRead <= 0){
+        printf("Error reading command to execute\n"); 
         return -1;
     } else {
         buffer[bytesRead - 1] = '\0';
         if((strcmp(buffer, "quit")) == 0) return 1;
         return 0; 
     }
+}
+
+int showPath(char *path, int size){
+    if(getcwd(path, size) == NULL){
+        printf("Invalid Path\n"); 
+        return 1; 
+    }   
+
+    if(write(1, path, strlen(path)) < 0) {
+        printf("Error writing path\n"); 
+        return 1;
+    }
+    if(write(1, "> ", 2) < 0){
+        printf("Error writing\n"); 
+        return 1; 
+    }
+    return 0; 
 }
 
 void print_banner(){

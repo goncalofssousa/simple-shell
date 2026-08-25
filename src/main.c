@@ -10,35 +10,31 @@
 #include<parser.h>
 #include<execution.h>
 #include"linked_list.h"
+#include<linux/limits.h>
 
 int main(){
     print_banner(); 
 
+    char path[PATH_MAX];
     char buffer[BUFF_SIZE];
 
     int result = 0; 
     while(!result){
-        write(1, "SaloShell> ", 12);   
+
+        if(showPath(path, PATH_MAX)) return 1; 
+        
         result = readCommandToExecute(buffer); 
-        if(result < 0){
-            printf("Error on read\n");
-            return 1; 
-        } else if (result == 0){
-            //tokenize input
+        if (result == 0){
             List *tokensList = tokenizeCommand(buffer);
-            // parse + free tokens
+
             List *commandsList = parseTokenList(tokensList);
             freeList(tokensList, freeToken); 
 
 
-            int resultExecution = execute(commandsList);
-            if(resultExecution) {
-                printf("Error executing\n");
-            } 
+            execute(commandsList);
             freeList(commandsList, freeCommand);  
         } 
-
-
+        else return 1; 
     }
 
     return 0; 

@@ -6,4 +6,5 @@
 
 int readCommandToExecute(char *buffer);
 void print_banner();
+int showPath(char *path, int size); 
 #endif
