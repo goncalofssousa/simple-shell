@@ -128,6 +128,7 @@ int execute(List *commands){
     int fd_in = 0; 
     int pipe_fds[2]; 
     int numCommands = 0; 
+    
     while(node != NULL){
         if(node->next != NULL){
             if(pipe(pipe_fds) < 0) {

@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror -g -Iinclude
+CFLAGS = -Wall -Wextra -Werror -g -Iinclude 
 
 NAME = simpleShell
 
@@ -18,7 +18,7 @@ OBJ = obj/linked_list.o \
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ) -o $(NAME) -lreadline
 	@mkdir -p tmp
 
 obj/%.o: src/%.c

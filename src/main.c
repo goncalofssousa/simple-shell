@@ -13,28 +13,25 @@
 #include<linux/limits.h>
 
 int main(){
-    print_banner(); 
+    clear(); 
 
     char path[PATH_MAX];
-    char buffer[BUFF_SIZE];
+    char *input; 
 
-    int result = 0; 
-    while(!result){
+    while(1){
+        input = readInput(path, sizeof(path)); 
+        if(!input) break;
 
-        if(showPath(path, PATH_MAX)) return 1; 
-        
-        result = readCommandToExecute(buffer); 
-        if (result == 0){
-            List *tokensList = tokenizeCommand(buffer);
+        List *tokensList = tokenizeCommand(input);
 
-            List *commandsList = parseTokenList(tokensList);
-            freeList(tokensList, freeToken); 
+        List *commandsList = parseTokenList(tokensList);
+        freeList(tokensList, freeToken); 
 
 
-            execute(commandsList);
-            freeList(commandsList, freeCommand);  
-        } 
-        else return 1; 
+        execute(commandsList);
+        freeList(commandsList, freeCommand);  
+         
+        free(input); 
     }
 
     return 0; 

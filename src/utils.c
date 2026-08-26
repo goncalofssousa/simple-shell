@@ -3,43 +3,39 @@
 #include<string.h>
 #include<utils.h>
 #include<linux/limits.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include<stdlib.h>
 
-int readCommandToExecute(char *buffer){
-    int bytesRead = read(0, buffer, sizeof buffer[0] * BUFF_SIZE - 1);
-    if(bytesRead <= 0){
-        printf("Error reading command to execute\n"); 
-        return -1;
-    } else {
-        buffer[bytesRead - 1] = '\0';
-        if((strcmp(buffer, "quit")) == 0) return 1;
-        return 0; 
+char *readInput(char *buffer, int maxSize) {
+    if (getcwd(buffer, maxSize) == NULL) {
+        printf("Error reading path\n");
+        return NULL;
     }
+
+    char prompt[PATH_MAX + 128];
+    char hostname[256];
+    char *username = getenv("USER");
+
+    if (gethostname(hostname, sizeof(hostname)) == -1) {
+        printf("Error getting host name");
+        return NULL;
+    }
+
+    snprintf(prompt, sizeof(prompt),
+            "\001\033[1;32m\002%s@%s"
+            "\001\033[0m\002:"
+            "\001\033[1;34m\002%s"
+            "\001\033[0m\002$ ",
+            username, hostname, buffer);
+
+    char *input = readline(prompt);
+
+    if (input && *input) add_history(input);
+
+    return input;
 }
 
-int showPath(char *path, int size){
-    if(getcwd(path, size) == NULL){
-        printf("Invalid Path\n"); 
-        return 1; 
-    }   
-
-    if(write(1, path, strlen(path)) < 0) {
-        printf("Error writing path\n"); 
-        return 1;
-    }
-    if(write(1, "> ", 2) < 0){
-        printf("Error writing\n"); 
-        return 1; 
-    }
-    return 0; 
-}
-
-void print_banner(){
+void clear(){
     printf("\033[H\033[J"); 
-
-    printf("========================================\n");
-    printf("              SaloShell\n");
-    printf("========================================\n");
-    printf("  A simple Unix shell written in C\n");
-    printf("  Type 'help' for available commands.\n");
-    printf("========================================\n\n");
 }

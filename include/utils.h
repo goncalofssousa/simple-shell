@@ -4,7 +4,6 @@
 #define BUFF_SIZE 4096
 
 
-int readCommandToExecute(char *buffer);
-void print_banner();
-int showPath(char *path, int size); 
+void clear();
+char *readInput(char *buffer, int maxSize);
 #endif
