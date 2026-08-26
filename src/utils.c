@@ -14,20 +14,15 @@ char *readInput(char *buffer, int maxSize) {
     }
 
     char prompt[PATH_MAX + 128];
-    char hostname[256];
     char *username = getenv("USER");
 
-    if (gethostname(hostname, sizeof(hostname)) == -1) {
-        printf("Error getting host name");
-        return NULL;
-    }
 
     snprintf(prompt, sizeof(prompt),
-            "\001\033[1;32m\002%s@%s"
+            "\001\033[1;32m\002%s"
             "\001\033[0m\002:"
             "\001\033[1;34m\002%s"
             "\001\033[0m\002$ ",
-            username, hostname, buffer);
+            username, buffer);
 
     char *input = readline(prompt);
 
