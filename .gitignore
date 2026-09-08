@@ -1,3 +1,4 @@
 obj/
 tmp/
 complie_commands.json
+.vscode
