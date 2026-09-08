@@ -1,12 +1,16 @@
-#include<command.h>
-#include<linked_list.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<fcntl.h>
-#include<stdio.h>
-#include<sys/wait.h>
-#include<redirection.h>
-#include<string.h>
+#include "entities/command.h"
+#include "entities/redirection.h"
+
+#include "data-structures/linked_list.h"
+
+#include "built-ins/manager-builtIns.h"
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <string.h>
 
 int handleCommandRedirects(List *redirections) {
     ListNode *node = redirections->head;
@@ -123,12 +127,19 @@ int handleCommandRedirects(List *redirections) {
     return 0;
 }
 
-int execute(List *commands){
+int execute(ManagerBuiltIns *managerBuiltIns, List *commands){
     ListNode *node = commands->head; 
+    if(commands->length == 1){
+        Command *cmd = (Command *) node->data; 
+        if(isBuiltIn(managerBuiltIns, cmd->args[0])){
+            return executeBuiltIn(managerBuiltIns, cmd->args); 
+        }
+    }
     int fd_in = 0; 
     int pipe_fds[2]; 
     int numCommands = 0; 
     
+
     while(node != NULL){
         if(node->next != NULL){
             if(pipe(pipe_fds) < 0) {
@@ -171,9 +182,14 @@ int execute(List *commands){
 
             if(handleCommandRedirects(cmd->redirections)) _exit(1);   
 
-            if(execvp(cmd->args[0], cmd->args) < 0){
-                printf("Command '%s' not found\n", cmd->args[0]);
-            } 
+            if(isBuiltIn(managerBuiltIns, cmd->args[0])){ 
+                int exitStatus = executeBuiltIn(managerBuiltIns, cmd->args);
+                _exit(exitStatus);  
+            } else {
+                if(execvp(cmd->args[0], cmd->args) < 0){
+                    printf("Command '%s' not found\n", cmd->args[0]);
+                } 
+            }
             _exit(1); 
         }  
         else if(pid < 0){

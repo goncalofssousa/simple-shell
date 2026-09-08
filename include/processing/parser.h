@@ -1,8 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "token.h"
-#include "command.h"
+#include "data-structures/linked_list.h"
 
 List *parseTokenList(List *tokenList); 
 

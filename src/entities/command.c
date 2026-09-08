@@ -1,8 +1,10 @@
-#include "command.h"
+#include "entities/command.h"
+#include "entities/redirection.h"
+
+#include "data-structures/linked_list.h"
+
 #include <stdlib.h>
-#include<stdio.h>
-#include "linked_list.h"
-#include "redirection.h"
+#include <stdio.h>
 
 Command *commandCreate() {
     Command *new = malloc(sizeof(Command));

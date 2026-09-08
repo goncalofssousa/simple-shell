@@ -1,8 +1,10 @@
-#include "tokenizer.h"
+#include "processing/tokenizer.h"
+
+#include "entities/token.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "linked_list.h"
 
 char *getRedirectionStart(char *p) {
     if (*p == '<' || *p == '>')

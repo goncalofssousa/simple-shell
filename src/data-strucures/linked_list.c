@@ -1,10 +1,11 @@
-#include"linked_list.h"
-#include<stdlib.h>
+#include "data-structures/linked_list.h"
+#include <stdlib.h>
 
 List *newList() {
     List *new = malloc(sizeof(List)); 
     new->head = NULL;
     new->tail = NULL; 
+    new->length = 0; 
     return new; 
 }
 // return de algo aqui em caso de erro (int)
@@ -21,6 +22,7 @@ void listAppend(List *list, void *data){
     }
 
     list->tail = new; 
+    list->length++; 
 }
 
 void freeList(List *list, void (*freeData)(void *data)){

@@ -1,7 +1,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include"linked_list.h"
+#include "data-structures/linked_list.h"
 
 #define MAX_ARGS 1024
 

@@ -1,19 +1,27 @@
-#include<utils.h>
-#include<stdlib.h>
-#include<stdio.h>
-#include<unistd.h>
+#include "utils.h"
+
+#include "processing/tokenizer.h"
+#include "processing/parser.h"
+#include "processing/executer.h"
+
+#include "data-structures/linked_list.h"
+
+#include "entities/command.h"
+#include "entities/token.h"
+
+#include "built-ins/manager-builtIns.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <unistd.h>     
 #include <sys/wait.h>   
 #include <sys/types.h>  
-#include<tokenizer.h>
-#include<command.h>
-#include<parser.h>
-#include<execution.h>
-#include"linked_list.h"
-#include<linux/limits.h>
+#include <linux/limits.h>
 
 int main(){
-    clear(); 
+    printBanner();
+    ManagerBuiltIns *managerBuiltIns = initBuiltIns(); 
 
     char path[PATH_MAX];
     char *input; 
@@ -28,11 +36,12 @@ int main(){
         freeList(tokensList, freeToken); 
 
 
-        execute(commandsList);
+        execute(managerBuiltIns, commandsList);
         freeList(commandsList, freeCommand);  
          
         free(input); 
     }
 
+    freeBuiltIns(managerBuiltIns); 
     return 0; 
 }

@@ -1,7 +1,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-#include"redirection.h"
+#include "redirection.h"
 
 typedef enum token_type {
     TOKEN_WORD,

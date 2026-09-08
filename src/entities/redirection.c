@@ -1,6 +1,7 @@
-#include"redirection.h"
-#include<stdlib.h>
-#include<stdio.h>
+#include "entities/redirection.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 
 char *redir_type_name(RedirectType type) {

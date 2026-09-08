@@ -9,6 +9,7 @@ typedef struct listNode {
 typedef struct list {
     ListNode *head; 
     ListNode *tail;
+    int length; 
 } List; 
 
 List *newList();

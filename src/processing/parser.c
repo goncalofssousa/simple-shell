@@ -1,4 +1,8 @@
-#include "parser.h"
+#include "processing/parser.h"
+
+#include "entities/token.h"
+#include "entities/command.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
