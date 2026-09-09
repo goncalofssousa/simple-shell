@@ -10,7 +10,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/wait.h>
-#include <string.h>
 
 int handleCommandRedirects(List *redirections) {
     ListNode *node = redirections->head;
