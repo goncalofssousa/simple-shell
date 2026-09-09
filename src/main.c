@@ -12,36 +12,46 @@
 #include "built-ins/manager-builtIns.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <unistd.h>     
 #include <sys/wait.h>   
 #include <sys/types.h>  
 #include <linux/limits.h>
 
-int main(){
-    printBanner();
-    ManagerBuiltIns *managerBuiltIns = initBuiltIns(); 
+int main() {
+    char *home = getenv("HOME");
+    char *user = initShell();
+    ManagerBuiltIns *managerBuiltIns = initBuiltIns();
 
-    char path[PATH_MAX];
-    char *input; 
+    char path_buffer[PATH_MAX];
 
-    while(1){
-        input = readInput(path, sizeof(path)); 
-        if(!input) break;
+    while (1) {
+        char *input = readInput(path_buffer, sizeof(path_buffer), user, home);
+
+        if (!input) break;
 
         List *tokensList = tokenizeCommand(input);
 
-        List *commandsList = parseTokenList(tokensList);
-        freeList(tokensList, freeToken); 
+        if (!tokensList) {
+            free(input);
+            continue;
+        }
 
+        List *commandsList = parseTokenList(tokensList);
+        freeList(tokensList, freeToken);
+
+        if (!commandsList) {
+            free(input);
+            continue;
+        }
 
         execute(managerBuiltIns, commandsList);
-        freeList(commandsList, freeCommand);  
-         
-        free(input); 
+
+        freeList(commandsList, freeCommand);
+        free(input);
     }
 
-    freeBuiltIns(managerBuiltIns); 
-    return 0; 
+    freeBuiltIns(managerBuiltIns);
+
+    return 0;
 }

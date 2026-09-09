@@ -1,6 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-char *readInput(char *buffer, int maxSize);
-void printBanner(); 
+char *initShell(); 
+char *readInput(char *buffer, int maxSize, char *username, char *home);
 #endif
