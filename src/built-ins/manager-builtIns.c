@@ -1,5 +1,8 @@
 #include "entities/builtIn.h"
 #include "built-ins/cd.h"
+#include "built-ins/exit.h"
+#include "built-ins/uni.h"
+#include "glib.h"
 #include "built-ins/manager-builtIns.h"
 
 ManagerBuiltIns *initBuiltIns(){
@@ -8,6 +11,13 @@ ManagerBuiltIns *initBuiltIns(){
 
     BuiltIn *builtInCd = createBuiltIn("cd", cd); 
     g_hash_table_insert(manager->builtIns, "cd", builtInCd);
+
+    BuiltIn *builtInExit = createBuiltIn("exit", builtin_exit); 
+    g_hash_table_insert(manager->builtIns, "exit", builtInExit);
+    
+
+    BuiltIn *builtInUni = createBuiltIn("uni", uni); 
+    g_hash_table_insert(manager->builtIns, "uni", builtInUni); 
 
     return manager; 
 }
