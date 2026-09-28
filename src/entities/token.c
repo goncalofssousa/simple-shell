@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fdSrc, int fdDest) {
     Token *token = malloc(sizeof(Token));
@@ -9,7 +10,7 @@ Token *tokenCreate(TokenType type, char *value, RedirectType redir_type, int fdS
     if (!token) return NULL;
 
     token->type = type;
-    token->value = value;
+    token->value = strdup(value);
     token->fdSrc = fdSrc;
     token->fdDest = fdDest;
     token->redir_type = redir_type;
@@ -23,6 +24,7 @@ void freeToken(void *data){
 
     if(!token) return; 
 
+    free(token->value); 
     free(token); 
 }
 

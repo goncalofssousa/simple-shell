@@ -26,5 +26,6 @@ void freeRedirection(void *data);
 void printRedirection(void *data);
 RedirectType getRedirectType(char *op);
 char *redir_type_name(RedirectType type);
+int getOperatorLength(RedirectType *redir_type,char *redir_op,int *fdDest);
 
 #endif

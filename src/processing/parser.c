@@ -1,5 +1,6 @@
 #include "processing/parser.h"
 
+#include "data-structures/linked_list.h"
 #include "entities/token.h"
 #include "entities/command.h"
 
@@ -40,11 +41,9 @@ void resolveHeredoc(char *filename, char *delimiter) {
 
 
 int isInvalid(ListNode *node, RedirectType type) {
-    if (type == REDIR_CLOSE || type == REDIR_DUPLICATE)
-        return 0;
+    if (type == REDIR_CLOSE || type == REDIR_DUPLICATE) return 0;
 
-    if (node->next == NULL)
-        return 1;
+    if (node->next == NULL) return 1;
 
     Token *nextToken = node->next->data;
 
@@ -72,7 +71,6 @@ Redirection *createRedirection(ListNode *node, int *numHeredoc) {
     if (isInvalid(node, token->redir_type)) return NULL;
 
     if (token->redir_type == REDIR_CLOSE || token->redir_type == REDIR_DUPLICATE) {
-
         return redirectionCreate(token->fdSrc, token->fdDest, token->redir_type, NULL);
     }
 
@@ -122,13 +120,13 @@ List *parseTokenList(List *tokenList) {
             }
 
             if (token->type == TOKEN_WORD) {
-                cmd->args[cmd->numArgs++] = token->value;
+                appendArg(cmd, token->value);
             } else if (token->type == TOKEN_DIR) {
                 Redirection *redir = createRedirection(current, &numHeredoc);
 
                 if (!redir) {
                     freeList(commands, freeCommand);
-                    return NULL;
+                    return NULL;    
                 }
 
                 listAppend(cmd->redirections, redir);

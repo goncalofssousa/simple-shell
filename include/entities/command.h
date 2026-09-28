@@ -12,6 +12,7 @@ typedef struct command {
 } Command;
 
 Command *commandCreate();
+int appendArg(Command *cmd, char *arg); 
 void freeCommand(void *data);
 void printCommand(void *data); 
 

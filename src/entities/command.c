@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 Command *commandCreate() {
     Command *new = malloc(sizeof(Command));
@@ -21,8 +22,23 @@ void freeCommand(void *data) {
 
     if(!cmd) return; 
 
+    for(int i = 0; i < cmd->numArgs; i++){
+        if(cmd->args[i]) free(cmd->args[i]); 
+    }
     freeList(cmd->redirections, freeRedirection);
     free(cmd);
+}
+
+int appendArg(Command *cmd, char *arg){
+    if(cmd == NULL) return 1;
+
+    if(arg == NULL){
+        cmd->args[cmd->numArgs] = NULL; 
+        return 0; 
+    }
+    
+    cmd->args[cmd->numArgs++] = strdup(arg);
+    return 0; 
 }
 
 void printCommand(void *data) {
